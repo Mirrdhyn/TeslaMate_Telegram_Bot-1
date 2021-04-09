@@ -18,7 +18,10 @@ RUN apt-get update && apt-get install -y \
 
 # Install pip requirements
 ADD src/requirements.txt .
-RUN python -m pip install -r requirements.txt
+RUN  ln -sf /usr/share/zoneinfo/Europe/Paris /etc/timezone && \
+     ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime && \
+     python -m pip install -r requirements.txt
+
 
 WORKDIR /app
 ADD . /app
