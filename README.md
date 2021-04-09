@@ -38,6 +38,7 @@ This is a telegram bot written in Python to notify by Telegram message when a ne
 - [x] Envoyer un message Telegram quand une portière s'ouvre
 - [x] Envoyer un message Telegram quand une charge démarre ou s'arrête
 - [x] Envoyer un message Telegram quand le temps de charge change
+- [x] Envoyer la dernière position GPS connue de la voiture lorsqu'elle se verrouille (utile pour retrouver dans un parking plein air par exemple)
 
 ## Requirements
 
