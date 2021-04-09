@@ -112,7 +112,7 @@ def on_message(client, userdata, msg):
 	if msg.topic == "teslamate/cars/1/locked":
 		text_state = "verrouilléé" if str(msg.payload.decode()) == "true" else "déverrouilléé"
 
-	text_msg = "🚙 Ma Tesla est <b>"+text_state+"</b> : "+str(today)+"\n🔋 : "+str(jsonData['usable_battery_level'])+"% ("+str(jsonData['est_battery_range_km'])+" km)\n⚡️ : "+text_energie+"\n"+lock_state+"\nPortes : "+doors_state+"\nCoffre : "+trunk_state+"\n🌡 intérieure : "+str(jsonData['inside_temp'])+"c\n🌡 extérieure : "+str(jsonData['outside_temp'])+"c\nClim : "+clim_state+"\nVersion : "+text_update
+	text_msg = "🚙 "+str(jsonData['display_name'])+" est <b>"+text_state+"</b> : "+str(today)+"\n🔋 : "+str(jsonData['usable_battery_level'])+"% ("+str(jsonData['est_battery_range_km'])+" km)\n⚡️ : "+text_energie+"\n"+lock_state+"\nPortes : "+doors_state+"\nCoffre : "+trunk_state+"\n🌡 intérieure : "+str(jsonData['inside_temp'])+"c\n🌡 extérieure : "+str(jsonData['outside_temp'])+"c\nClim : "+clim_state+"\nVersion : "+text_update
 
 	bot.send_message(
 		chat_id,
