@@ -1,5 +1,10 @@
 # TeslaMate Telegram Bot
 
+## A propos / Disclamer
+Ce fork du projet est fait pour montrer ce qu'on peut faire avec ce bout de code de départ, avec le projet [Tesla MQTT API](https://github.com/tlj/teslamate-mqtt-api) et quelques lignes de codes Python 3.8 pour avoir des informations sur sa Tesla.
+
+Le code partagé dans le dossier src a été retouché dans ce sens, mais présente trop de changement par rapport au dépot initial. C'est pourquoi ce fork, en laissant les liens initiaux (PayPal et autres), tout en partageant mes modifications.
+
 [![latest release](https://img.shields.io/github/v/release/JakobLichterfeld/TeslaMate_Telegram_Bot)](https://github.com/JakobLichterfeld/TeslaMate_Telegram_Bot/releases/latest)
 [![](https://images.microbadger.com/badges/version/teslamatetelegrambot/teslamatetelegrambot.svg)](https://hub.docker.com/r/teslamatetelegrambot/teslamatetelegrambot)
 [![](https://images.microbadger.com/badges/image/teslamatetelegrambot/teslamatetelegrambot.svg)](https://microbadger.com/images/teslamatetelegrambot/teslamatetelegrambot)
@@ -28,7 +33,11 @@ This is a telegram bot written in Python to notify by Telegram message when a ne
 
 ## Features
 
-- [x] Sends a telegram message to you if an update for your tesla is available
+- [x] Envoyer un message Telegram quand une mise à jour est disponible
+- [x] Envoyer un message Telegram quand un changement d'état se produit
+- [x] Envoyer un message Telegram quand une portière s'ouvre
+- [x] Envoyer un message Telegram quand une charge démarre ou s'arrête
+- [x] Envoyer un message Telegram quand le temps de charge change
 
 ## Requirements
 
@@ -73,12 +82,15 @@ This setup is recommended only if you are running TeslaMate Telegram Bot **on yo
 2. Build and start the docker container with `docker-compose up`. To run the containers in the background add the `-d` flag:
 
    ```bash
+   docker-compose build
    docker-compose up -d
    ```
 
 ## Update
 
 Check out the [release notes](https://github.com/JakobLichterfeld/TeslaMate_Telegram_Bot/releases) before upgrading!
+
+### Note FR : A faire uniquement si vous n'avez pas de modification apportée au code dans src.
 
 Pull the new images:
 
