@@ -68,7 +68,7 @@ def on_message(client, userdata, msg):
 	trunk_state = "fermé" if str(jsonData['trunk_open']) == "0" else "ouvert"
 	clim_state = "éteinte" if str(jsonData['is_climate_on']) == "0" else "allumée"
 	current_version = str(jsonData['version'])
-	text_update = current_version+" ("+str(jsonData['update_version'])+")" if str(jsonData['update_version']) == "1" else current_version+" (à jour)"
+	text_update = current_version+" ("+str(jsonData['update_version'])+")" if str(jsonData['update_available']) == "1" else current_version+" (à jour)"
 
 	if msg.topic == "teslamate/cars/1/state":
 		print("Changement d'état : "+str(msg.payload.decode()))
