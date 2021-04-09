@@ -72,6 +72,7 @@ This setup is recommended only if you are running TeslaMate Telegram Bot **on yo
             - MQTT_BROKER_PORT=1883 #optional, default 1883
             - TELEGRAM_BOT_API_KEY=secret_api_key
             - TELEGRAM_BOT_CHAT_ID=secret_chat_id
+            - TELSAMATE_MQTT_API_URL=http://127.0.0.1:3040/car/1?api_key=xxxxx #CHANGEME with the MQTT API URL
           ports:
             - 1883
           build:
