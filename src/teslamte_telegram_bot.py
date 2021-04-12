@@ -127,7 +127,7 @@ def on_message(client, userdata, msg):
 			text_energie = "⚡️ : 🔌 "+texte_temps+"\nLimite à "+str(jsonData['charge_limit_soc'])+"%\nCharge ajoutée : "+str(jsonData['charge_energy_added'])+" kWh."
 
 	if msg.topic == "teslamate/cars/1/locked" and notif_locked == True:
-			if str(msg.payload.decode()) == "true":
+			if str(msg.payload.decode()) == "true" and str(jsonData['state']) != "asleep":
 				send_current_location = True
 				text_state = "verrouilléé"
 			elif str(msg.payload.decode()) == "false":
