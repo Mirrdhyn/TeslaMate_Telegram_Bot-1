@@ -20,6 +20,10 @@ if os.getenv('TELEGRAM_BOT_CHAT_ID') == None:
 	exit(1)
 chat_id = os.getenv('TELEGRAM_BOT_CHAT_ID')
 api_url = os.getenv('TELSAMATE_MQTT_API_URL') #It should be something like http://127.0.0.1:3040/car/1?api_key=xxxxxxxxxxx
+notif_conduite = False
+notif_charge = True
+notif_porte = True
+notif_locked = True
 # based on example from https://pypi.org/project/paho-mqtt/
 # The callback for when the client receives a CONNACK response from the server.
 
@@ -56,9 +60,9 @@ def on_connect(client, userdata, flags, rc):
 
 
 def on_message(client, userdata, msg):
-	print(msg.topic+" "+str(msg.payload.decode()))
 	now = datetime.now()
 	today = now.strftime("%d-%m-%Y %H:%M:%S")
+	print(str(today)+" >> "+msg.topic+" : "+str(msg.payload.decode()))
 	r = requests.get(api_url)
 	jsonData = r.json()
 	text_energie = "⚡️ : 🔋" if str(jsonData['plugged_in']) == "0" else "⚡️ : 🔌"
@@ -73,63 +77,69 @@ def on_message(client, userdata, msg):
 	send_current_location = False
 	
 	if msg.topic == "teslamate/cars/1/update_available" and str(msg.payload.decode()) == "true":
-		text_state = str(jsonData['state'])
+		text_state = 🎁+" "+str(jsonData['state'])
 
 	if msg.topic == "teslamate/cars/1/state":
-		print("Changement d'état : "+str(msg.payload.decode()))
-		if str(msg.payload.decode()) == "online" or str(msg.payload.decode()) == "asleep" or str(msg.payload.decode()) == "suspended":
-			if str(msg.payload.decode()) == "online":
-				text_state = "en ligne"
-			elif str(msg.payload.decode()) == "suspended":
-				text_state = "en train de s'endormir..."
-			else:
-				text_state = "endormie"
+		if str(msg.payload.decode()) == "online":
+			text_state = "en ligne"
+		elif str(msg.payload.decode()) == "asleep":
+			text_state = "endormie"
+		elif str(msg.payload.decode()) == "suspended":
+			text_state = "en train de s'endormir..."
 		elif str(msg.payload.decode()) == "charging":
 			text_state = "en charge"
-			temps_restant = float(jsonData['time_to_full_charge']) * float(60)
-			if temps_restant > 1:
-				texte_temps = "⏳ "+str(temps_restant)+" minutes pour être chargée."
-			elif temps_restant == 0:
-				texte_temps = "Charge terminée."
-			else:
-				texte_temps = "⏳ "+str(temps_restant)+" minute pour être chargée."
-			text_energie = "⚡️ : 🔌 "+texte_temps+"\nLimite à "+str(jsonData['charge_limit_soc'])+"%\nCharge ajoutée : "+str(jsonData['charge_energy_added'])+" kWh."
 		elif str(msg.payload.decode()) == "offline":
-			text_state = "éteinte"
+			text_state = "éteinte/injoignable"
 			send_current_location = True
-		elif str(msg.payload.decode()) == "driving" and str(jsonData['locked']) == "0":
+		elif str(msg.payload.decode()) == "start":
+			text_state = "en train de s'allumer..."
+			send_current_location = True
+		elif str(msg.payload.decode()) == "driving" and notif_conduite == True:
 			text_state = "en conduite"
 		else:
-			text_state = str(msg.payload.decode())
+			print("Etat non pris en charge : "+str(msg.payload.decode()))
 
 	if msg.topic == "teslamate/cars/1/time_to_full_charge":
-		print("Temps de chargement restant : "+str(msg.payload.decode()))
 		if str(jsonData['state']) == "charging":
 			text_state = "en charge"
-			temps_restant = float(jsonData['time_to_full_charge']) * float(60)
-			if temps_restant > 1:
-				texte_temps = "⏳ "+str(temps_restant)+" minutes pour être chargée."
-			elif temps_restant == 0:
-				texte_temps = "Charge terminée."
-			else:
-				texte_temps = "⏳ "+str(temps_restant)+" minute pour être chargée."
+			temps_restant_mqtt = msg.payload.decode()
+			if float(temps_restant_mqtt) > 1 and notif_charge == True:
+				temps_restant_heure = int(temps_restant_mqtt)
+				temps_restant_minute = round((float(temps_restant_mqtt) - temps_restant_heure) * 60,1)
+				texte_minute = "minute." if temps_restant_minute < 2 else "minutes."
+				if temps_restant_heure == 1:
+					texte_temps = "⏳ "+str(temps_restant_heure)+" heure et "+str(temps_restant_minute)+" "+texte_minute
+				elif temps_restant_heure == 0:
+					texte_temps = "⏳ "+str(temps_restant_minute)+" "+texte_minute
+				else:
+					texte_temps = "⏳ "+str(temps_restant_heure)+" heures et "+str(temps_restant_minute)+" "+texte_minute
+			if int(jsonData['usable_battery_level']) == int(jsonData['charge_limit_soc']):
+				temps_restant = round(float(temps_restant_mqtt) * 60,2)
+				temps_restant_minute = int(temps_restant)
+				texte_minute = int(temps_restant)+" minute" if int(temps_restant) < 2 else " minutes"
+				if float(temps_restant_mqtt) < 1:
+					temps_restant_seconde = int((temps_restant - temps_restant_minute) * 60)
+					texte_temps = "⏳ "+temps_restant_seconde+" secondes."
+				else:
+					texte_temps = "⏳ "+temps_restant+texte_minute
+			if float(temps_restant_mqtt) == 0.0:
+				texte_temps = "✅ Charge terminée."
 			text_energie = "⚡️ : 🔌 "+texte_temps+"\nLimite à "+str(jsonData['charge_limit_soc'])+"%\nCharge ajoutée : "+str(jsonData['charge_energy_added'])+" kWh."
 
-	if msg.topic == "teslamate/cars/1/locked":
-		if str(jsonData['state']) != "asleep":
-			send_current_location = True
+	if msg.topic == "teslamate/cars/1/locked" and notif_locked == True:
 			if str(msg.payload.decode()) == "true":
+				send_current_location = True
 				text_state = "verrouilléé"
 			elif str(msg.payload.decode()) == "false":
 				 text_state = "déverrouilléé"
 
-	if msg.topic == "teslamate/cars/1/doors_open":
-		if str(msg.payload.decode()) == "false" and str(jsonData['locked']) == "0":
-			text_state = "fermée"
-		elif str(msg.payload.decode()) == "true":
+	if msg.topic == "teslamate/cars/1/doors_open" and notif_porte == True:
+		# if str(msg.payload.decode()) == "false":
+		# 	text_state = "fermée"
+		if str(msg.payload.decode()) == "true":
 			text_state = "ouverte"
 
-	text_msg = "🚙 "+str(jsonData['display_name'])+" est <b>"+text_state+"</b> : "+str(today)+"\n🔋 : "+str(jsonData['usable_battery_level'])+"% ("+str(jsonData['est_battery_range_km'])+" km)\n"+text_energie+"\n"+lock_state+"\nPortes : "+doors_state+"\nCoffre : "+trunk_state+"\n🌡 intérieure : "+str(jsonData['inside_temp'])+"°c\n🌡 extérieure : "+str(jsonData['outside_temp'])+"°c\nClim : "+clim_state+"\nVersion : "+text_update
+	text_msg = "🚙 "+str(jsonData['display_name'])+" est <b>"+text_state+"</b>\n🔋 : "+str(jsonData['usable_battery_level'])+"% ("+str(jsonData['est_battery_range_km'])+" km)\n"+text_energie+"\n"+lock_state+"\nPortes : "+doors_state+"\nCoffre : "+trunk_state+"\n🌡 intérieure : "+str(jsonData['inside_temp'])+"°c\n🌡 extérieure : "+str(jsonData['outside_temp'])+"°c\nClim : "+clim_state+"\nVersion : "+text_update+"\n"+str(today)
 
 	bot.send_message(
 		chat_id,
