@@ -77,7 +77,7 @@ def on_message(client, userdata, msg):
 	send_current_location = False
 	
 	if msg.topic == "teslamate/cars/1/update_available" and str(msg.payload.decode()) == "true":
-		text_state = 🎁+" "+str(jsonData['state'])
+		text_state = "🎁 "+str(jsonData['state'])
 
 	if msg.topic == "teslamate/cars/1/state":
 		if str(msg.payload.decode()) == "online":
