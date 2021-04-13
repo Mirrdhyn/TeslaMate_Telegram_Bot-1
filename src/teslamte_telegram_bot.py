@@ -100,7 +100,7 @@ def on_message(client, userdata, msg):
 			print("Etat non pris en charge : "+str(msg.payload.decode()))
 
 	if msg.topic == "teslamate/cars/1/time_to_full_charge":
-		if str(jsonData['state']) == "charging":
+		if str(jsonData['state']) == "online" or str(jsonData['state']) == "charging":
 			text_state = "en charge"
 			temps_restant_mqtt = msg.payload.decode()
 			if float(temps_restant_mqtt) > 1 and notif_charge == True:
