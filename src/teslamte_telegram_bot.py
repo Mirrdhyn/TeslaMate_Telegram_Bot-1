@@ -113,7 +113,7 @@ def on_message(client, userdata, msg):
 					texte_temps = "⏳ "+str(temps_restant_minute)+" "+texte_minute
 				else:
 					texte_temps = "⏳ "+str(temps_restant_heure)+" heures et "+str(temps_restant_minute)+" "+texte_minute
-			if int(jsonData['usable_battery_level']) == int(jsonData['charge_limit_soc']):
+			if int(jsonData['battery_level']) == int(jsonData['charge_limit_soc']):
 				temps_restant = round(float(temps_restant_mqtt) * 60,2)
 				temps_restant_minute = int(temps_restant)
 				texte_minute = int(temps_restant)+" minute" if int(temps_restant) < 2 else " minutes"
@@ -122,7 +122,7 @@ def on_message(client, userdata, msg):
 					texte_temps = "⏳ "+temps_restant_seconde+" secondes."
 				else:
 					texte_temps = "⏳ "+temps_restant+texte_minute
-			if float(temps_restant_mqtt) == 0.0:
+			if str(temps_restant_mqtt) == "0.0":
 				texte_temps = "✅ Charge terminée."
 			text_energie = "⚡️ : 🔌 "+texte_temps+"\nLimite à "+str(jsonData['charge_limit_soc'])+"%\nCharge ajoutée : "+str(jsonData['charge_energy_added'])+" kWh."
 
