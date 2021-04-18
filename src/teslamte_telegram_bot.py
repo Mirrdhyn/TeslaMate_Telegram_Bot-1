@@ -100,12 +100,13 @@ def on_message(client, userdata, msg):
 			print("Etat non pris en charge : "+str(msg.payload.decode()))
 
 	if msg.topic == "teslamate/cars/1/time_to_full_charge":
-		if str(jsonData['state']) == "online" or str(jsonData['state']) == "charging":
+		print(str(today)+" >> State("+str(jsonData['state'])+") "+msg.topic+" : "+str(msg.payload.decode()))
+		if (str(jsonData['state']) == "online" or str(jsonData['state']) == "charging") and notif_charge == True:
 			text_state = "en charge"
-			temps_restant_mqtt = msg.payload.decode()
-			if float(temps_restant_mqtt) > 1 and notif_charge == True:
+			temps_restant_mqtt = float(msg.payload.decode())
+			if int(temps_restant_mqtt) > 1 and notif_extra_charge == True:
 				temps_restant_heure = int(temps_restant_mqtt)
-				temps_restant_minute = round((float(temps_restant_mqtt) - temps_restant_heure) * 60,1)
+				temps_restant_minute = int((float(temps_restant_mqtt) - temps_restant_heure) * 60)
 				texte_minute = "minute." if temps_restant_minute < 2 else "minutes."
 				if temps_restant_heure == 1:
 					texte_temps = "⏳ "+str(temps_restant_heure)+" heure et "+str(temps_restant_minute)+" "+texte_minute
@@ -113,7 +114,7 @@ def on_message(client, userdata, msg):
 					texte_temps = "⏳ "+str(temps_restant_minute)+" "+texte_minute
 				else:
 					texte_temps = "⏳ "+str(temps_restant_heure)+" heures et "+str(temps_restant_minute)+" "+texte_minute
-			if int(jsonData['battery_level']) == int(jsonData['charge_limit_soc']):
+			elif int(jsonData['battery_level']) == int(jsonData['charge_limit_soc']):
 				temps_restant = round(float(temps_restant_mqtt) * 60,2)
 				temps_restant_minute = int(temps_restant)
 				texte_minute = int(temps_restant)+" minute" if int(temps_restant) < 2 else " minutes"
@@ -122,9 +123,9 @@ def on_message(client, userdata, msg):
 					texte_temps = "⏳ "+temps_restant_seconde+" secondes."
 				else:
 					texte_temps = "⏳ "+temps_restant+texte_minute
-			if str(temps_restant_mqtt) == "0.0":
+			elif str(temps_restant_mqtt) == "0.0":
 				texte_temps = "✅ Charge terminée."
-			text_energie = "⚡️ : 🔌 "+texte_temps+"\nLimite à "+str(jsonData['charge_limit_soc'])+"%\nCharge ajoutée : "+str(jsonData['charge_energy_added'])+" kWh."
+			text_energie = "⚡️ : 🔌 "+texte_temps+"\n⏱ Limite à "+str(jsonData['charge_limit_soc'])+"%\nCharge ajoutée : "+str(jsonData['charge_energy_added'])+" kWh."
 
 	if msg.topic == "teslamate/cars/1/locked" and notif_locked == True:
 			if str(msg.payload.decode()) == "true" and str(jsonData['state']) != "asleep":
