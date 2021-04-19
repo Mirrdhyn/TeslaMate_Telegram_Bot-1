@@ -104,7 +104,7 @@ def on_message(client, userdata, msg):
 		if (str(jsonData['state']) == "online" or str(jsonData['state']) == "charging") and notif_charge == True:
 			text_state = "en charge"
 			temps_restant_mqtt = float(msg.payload.decode())
-			if int(temps_restant_mqtt) > 1 and notif_extra_charge == True:
+			if int(temps_restant_mqtt) >= 1 and notif_extra_charge == True:
 				temps_restant_heure = int(temps_restant_mqtt)
 				temps_restant_minute = int((temps_restant_mqtt - temps_restant_heure) * 60)
 				texte_minute = "minute." if temps_restant_minute < 2 else "minutes."
@@ -114,6 +114,15 @@ def on_message(client, userdata, msg):
 					texte_temps = "⏳ "+str(temps_restant_minute)+" "+texte_minute
 				else:
 					texte_temps = "⏳ "+str(temps_restant_heure)+" heures et "+str(temps_restant_minute)+" "+texte_minute
+			elif int(temps_restant_mqtt) < 1 and notif_extra_charge == True:
+				temps_restant_minute = int(temps_restant_mqtt * 60)
+				texte_minute = "minute." if temps_restant_minute < 2 else "minutes."
+				if temps_restant_minute == 0:
+					temps_restant_seconde = int((temps_restant - temps_restant_minute) * 60) # (12,8 - 12) * 60 = 48 secondes
+					texte_seconde = " seconde" if temps_restant_seconde < 2 else " secondes"
+					texte_temps = "⏳ "+str(temps_restant_seconde)+" "+texte_seconde
+				else:
+					texte_temps = "⏳ "+str(temps_restant_minute)+" "+texte_minute
 			elif str(msg.payload.decode()) == "0.0":
 				texte_temps = "✅ Charge terminée."
 			elif int(jsonData['battery_level']) == int(jsonData['charge_limit_soc']):
