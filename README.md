@@ -15,7 +15,7 @@ This is a telegram bot written in Python to notify by Telegram message when a ne
 ## Screenshots
 
 <p align="center">
-  <img src="screenshots/Capture d’écran 2021-04-09 à 09.05.07.png" alt="Telegram Message: SW Update available" title="telegram_message_sw_update" />
+  <img src="screenshots/teslabot2.png" alt="Telegram Message: SW Update available" title="telegram_message_sw_update" />
 </p>
 
 ## Table of contents
