@@ -106,7 +106,7 @@ def on_message(client, userdata, msg):
 			temps_restant_mqtt = float(msg.payload.decode())
 			if int(temps_restant_mqtt) > 1 and notif_extra_charge == True:
 				temps_restant_heure = int(temps_restant_mqtt)
-				temps_restant_minute = int((float(temps_restant_mqtt) - temps_restant_heure) * 60)
+				temps_restant_minute = int((temps_restant_mqtt - temps_restant_heure) * 60)
 				texte_minute = "minute." if temps_restant_minute < 2 else "minutes."
 				if temps_restant_heure == 1:
 					texte_temps = "⏳ "+str(temps_restant_heure)+" heure et "+str(temps_restant_minute)+" "+texte_minute
@@ -114,17 +114,20 @@ def on_message(client, userdata, msg):
 					texte_temps = "⏳ "+str(temps_restant_minute)+" "+texte_minute
 				else:
 					texte_temps = "⏳ "+str(temps_restant_heure)+" heures et "+str(temps_restant_minute)+" "+texte_minute
+			elif str(msg.payload.decode()) == "0.0":
+				texte_temps = "✅ Charge terminée."
 			elif int(jsonData['battery_level']) == int(jsonData['charge_limit_soc']):
 				temps_restant = round(float(temps_restant_mqtt) * 60,2)
 				temps_restant_minute = int(temps_restant)
-				texte_minute = int(temps_restant)+" minute" if int(temps_restant) < 2 else " minutes"
-				if float(temps_restant_mqtt) < 1:
-					temps_restant_seconde = int((temps_restant - temps_restant_minute) * 60)
-					texte_temps = "⏳ "+temps_restant_seconde+" secondes."
+				if temps_restant_minute < 1:
+					temps_restant_seconde = int(temps_restant * 60)
+					texte_seconde = " seconde" if temps_restant_seconde < 2 else " secondes"
+					texte_temps = "⏳ "+str(temps_restant_seconde)+texte_seconde
 				else:
-					texte_temps = "⏳ "+temps_restant+texte_minute
-			elif str(msg.payload.decode()) == "0.0":
-				texte_temps = "✅ Charge terminée."
+					texte_minute = int(temps_restant)+" minute " if int(temps_restant) < 2 else " minutes "
+					temps_restant_seconde = int((temps_restant - temps_restant_minute) * 60) # (12,8 - 12) * 60 = 48 secondes
+					texte_seconde = " seconde" if temps_restant_seconde < 2 else " secondes"
+					texte_temps = "⏳ "+str(temps_restant_minute)+texte_minute+str(temps_restant_seconde)+texte_seconde
 			text_energie = "⚡️ : 🔌 "+texte_temps+"\n⏱ Limite à "+str(jsonData['charge_limit_soc'])+"%\nCharge ajoutée : "+str(jsonData['charge_energy_added'])+" kWh."
 
 	if msg.topic == "teslamate/cars/1/locked" and notif_locked == True:
