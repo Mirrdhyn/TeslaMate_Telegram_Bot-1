@@ -123,7 +123,7 @@ def on_message(client, userdata, msg):
 					texte_temps = "⏳ "+temps_restant_seconde+" secondes."
 				else:
 					texte_temps = "⏳ "+temps_restant+texte_minute
-			elif str(temps_restant_mqtt) == "0.0":
+			elif str(msg.payload.decode()) == "0.0":
 				texte_temps = "✅ Charge terminée."
 			text_energie = "⚡️ : 🔌 "+texte_temps+"\n⏱ Limite à "+str(jsonData['charge_limit_soc'])+"%\nCharge ajoutée : "+str(jsonData['charge_energy_added'])+" kWh."
 
